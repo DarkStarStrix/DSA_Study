@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <title>DSA Practice</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .timer {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .day-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .day-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #e0e0e0;
+            cursor: pointer;
+        }
+        .day-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .problem-card, .editor-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .editor {
+            width: 100%;
+            height: 400px;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 10px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            border-radius: 4px;
+            resize: none;
+        }
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-start {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-stop {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-run {
+            background: #2563eb;
+            color: white;
+        }
+        .example {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .section {
+            margin-top: 20px;
+        }
+        .section textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+        }
+        .output {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 20px;
+            height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>DSA Practice</h1>
+            <div class="timer">Time: <span id="time">0:00</span></div>
+        </div>
+
+        <div class="day-selector" id="daySelector"></div>
+
+        <div class="content">
+            <div class="problem-card">
+                <h2 id="topic"></h2>
+                <div id="problem"></div>
+                <div id="example" class="example"></div>
+                <div id="hint"></div>
+            </div>
+            <div class="editor-card">
+                <div id="editor" class="editor"></div>
+                <div class="controls">
+                    <button id="runBtn" class="btn btn-start">Start Coding</button>
+                    <button id="verifyBtn" class="btn btn-run">Run Code</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Solution Explanation</h3>
+            <label for="solution-explanation"></label><textarea id="solution-explanation" placeholder="Explain your solution here..."></textarea>
+        </div>
+        <div class="section">
+            <h3>Justification</h3>
+            <label for="justification"></label><textarea id="justification" placeholder="Justify your solution here..."></textarea>
+        </div>
+        <div class="section">
+            <h3>Time Complexity</h3>
+            <label for="time-complexity"></label><textarea id="time-complexity" placeholder="Explain the time complexity here..."></textarea>
+        </div>
+
+        <div class="output" id="output"></div>
+    </div>
+
+    <script>
+        const problems = {
+            1: {
+                topic: "Strings",
+                problem: "Given a string s, find the longest palindromic substring in s.",
+                example: "Input: 'babad'\nOutput: 'bab' or 'aba'",
+                hint: "Consider each character as a potential center of palindrome",
+                starterCode: "def longest_palindrome(s: str) -> str:\n    # Your code here\n    pass"
+            },
+            2: {
+                topic: "Hash Maps",
+                problem: "Given an array of integers, return indices of the two numbers such that they add up to a specific target.",
+                example: "Input: nums = [2, 7, 11, 15], target = 9\nOutput: [0, 1]",
+                hint: "Use a hash map to store the difference between the target and the current number",
+                starterCode: "def two_sum(nums: List[int], target: int) -> List[int]:\n    # Your code here\n    pass"
+            },
+            3: {
+                topic: "Linked Lists",
+                problem: "Given a linked list, reverse the nodes of a linked list k at a time and return its modified list.",
+                example: "Input: 1->2->3->4->5, k = 2\nOutput: 2->1->4->3->5",
+                hint: "Use a dummy node to simplify the process",
+                starterCode: "def reverse_k_group(head: ListNode, k: int) -> ListNode:\n    # Your code here\n    pass"
+            },
+            4: {
+                topic: "Stacks & Queues",
+                problem: "Implement a basic calculator to evaluate a simple expression string.",
+                example: "Input: '3+2*2'\nOutput: 7",
+                hint: "Use a stack to handle the operators and operands",
+                starterCode: "def calculate(s: str) -> int:\n    # Your code here\n    pass"
+            },
+            5: {
+                topic: "Trees",
+                problem: "Given a binary tree, find its maximum depth.",
+                example: "Input: [3,9,20,null,null,15,7]\nOutput: 3",
+                hint: "Use depth-first search to traverse the tree",
+                starterCode: "def max_depth(root: TreeNode) -> int:\n    # Your code here\n    pass"
+            },
+            6: {
+                topic: "Breadth-first Search",
+                problem: "Given a binary tree, return the level order traversal of its nodes' values.",
+                example: "Input: [3,9,20,null,null,15,7]\nOutput: [[3],[9,20],[15,7]]",
+                hint: "Use a queue to traverse the tree level by level",
+                starterCode: "def level_order(root: TreeNode) -> List[List[int]]:\n    # Your code here\n    pass"
+            },
+            7: {
+                topic: "Depth-first Search",
+                problem: "Given a binary tree, return all root-to-leaf paths.",
+                example: "Input: [1,2,3,null,5]\nOutput: ['1->2->5','1->3']",
+                hint: "Use depth-first search to find all paths",
+                starterCode: "def binary_tree_paths(root: TreeNode) -> List[str]:\n    # Your code here\n    pass"
+            },
+            8: {
+                topic: "Backtracking",
+                problem: "Given a set of distinct integers, return all possible subsets.",
+                example: "Input: [1,2,3]\nOutput: [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]",
+                hint: "Use backtracking to generate all subsets",
+                starterCode: "def subsets(nums: List[int]) -> List[List[int]]:\n    # Your code here\n    pass"
+            },
+            9: {
+                topic: "Greedy Algorithms",
+                problem: "Given an array of non-negative integers, you are initially positioned at the first index of the array. Each element in the array represents your maximum jump length at that position. Determine if you are able to reach the last index.",
+                example: "Input: [2,3,1,1,4]\nOutput: true",
+                hint: "Use a greedy approach to keep track of the farthest position you can reach",
+                starterCode: "def can_jump(nums: List[int]) -> bool:\n    # Your code here\n    pass"
+            },
+            10: {
+                topic: "Memoization",
+                problem: "Given an integer n, return the number of ways to climb a staircase with n steps, where you can take 1 or 2 steps at a time.",
+                example: "Input: 2\nOutput: 2",
+                hint: "Use memoization to store the results of subproblems",
+                starterCode: "def climb_stairs(n: int) -> int:\n    # Your code here\n    pass"
+            },
+            11: {
+                topic: "Dynamic Programming",
+                problem: "Given an integer array nums, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.",
+                example: "Input: [-2,1,-3,4,-1,2,1,-5,4]\nOutput: 6",
+                hint: "Use dynamic programming to keep track of the maximum subarray sum ending at each position",
+                starterCode: "def max_sub_array(nums: List[int]) -> int:\n    # Your code here\n    pass"
+            },
+            12: {
+                topic: "Advanced Topics",
+                problem: "Given a string s, return the number of distinct non-empty substrings of s.",
+                example: "Input: 'abc'\nOutput: 6",
+                hint: "Use a suffix array or a trie to find all distinct substrings",
+                starterCode: "def count_distinct_substrings(s: str) -> int:\n    # Your code here\n    pass"
+            }
+        };
+
+        let currentDay = 1;
+        let timer = 0;
+        let timerInterval;
+        let isRunning = false;
+
+        function updateProblem(day) {
+            const problem = problems[day];
+            document.getElementById('topic').textContent = `Day ${day}: ${problem.topic}`;
+            document.getElementById('problem').textContent = problem.problem;
+            document.getElementById('example').textContent = problem.example;
+            document.getElementById('hint').textContent = `Hint: ${problem.hint}`;
+            editor.setValue(problem.starterCode, -1);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                document.getElementById('runBtn').textContent = 'Start Coding';
+                document.getElementById('runBtn').classList.remove('btn-stop');
+                document.getElementById('runBtn').classList.add('btn-start');
+            } else {
+                timer = 0;
+                timerInterval = setInterval(() => {
+                    timer++;
+                    document.getElementById('time').textContent = formatTime(timer);
+                }, 1000);
+                document.getElementById('runBtn').textContent = 'Stop Coding';
+                document.getElementById('runBtn').classList.remove('btn-start');
+                document.getElementById('runBtn').classList.add('btn-stop');
+            }
+            isRunning = !isRunning;
+        }
+
+        async function verifyCode() {
+            const code = editor.getValue();
+            const output = document.getElementById('output');
+            output.textContent = '';
+            try {
+                const response = await fetch('http://localhost:3000/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        script: code,
+                        language: 'python3',
+                        versionIndex: '3'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                output.textContent = result.output;
+            } catch (error) {
+                console.error('Error:', error);
+                output.textContent = 'Failed to execute code. Please try again later.';
+            }
+        }
+
+        function saveResponse() {
+            const solution = document.getElementById('solution-explanation').value;
+            const justification = document.getElementById('justification').value;
+            const timeComplexity = document.getElementById('time-complexity').value;
+            localStorage.setItem('solution', solution);
+            localStorage.setItem('justification', justification);
+            localStorage.setItem('timeComplexity', timeComplexity);
+            alert('Responses saved!');
+        }
+
+        // Initialize Ace Editor
+        const editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/python");
+
+        // Initialize day selector
+        const daySelector = document.getElementById('daySelector');
+        for (let i = 1; i <= 12; i++) {
+            const btn = document.createElement('button');
+            btn.className = `day-btn ${i === 1 ? 'active' : ''}`;
+            btn.textContent = `${i}`;
+            btn.onclick = () => {
+                document.querySelector('.day-btn.active').classList.remove('active');
+                btn.classList.add('active');
+                currentDay = i;
+                updateProblem(i);
+            };
+            daySelector.appendChild(btn);
+        }
+
+        // Initialize event listeners
+        document.getElementById('runBtn').onclick = toggleTimer;
+        document.getElementById('verifyBtn').onclick = verifyCode;
+        document.getElementById('solution-explanation').onblur = saveResponse;
+        document.getElementById('justification').onblur = saveResponse;
+        document.getElementById('time-complexity').onblur = saveResponse;
+
+        // Initial problem load
+        updateProblem(1);
+    </script>
+</body>
+</html>
